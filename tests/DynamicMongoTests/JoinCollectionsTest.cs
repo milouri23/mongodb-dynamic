@@ -147,5 +147,42 @@ namespace DynamicMongoTests
 
             Assert.Equal(person.Name, orderPerson2.Person.Name);
         }
+
+        [Fact]
+        public async Task ShouldMakeLookupWithOrderWithoutProductName()
+        {
+            Person person = await _personsCollection.Find(_ => true).FirstOrDefaultAsync();
+
+            Order order = new()
+            {
+                PersonId = person.Id,
+                ProductName = "Product X",
+                Quantity = 3,
+                UnitValue = 30.99M
+            };
+
+            await InsertOrder(order);
+
+            IMongoCollection<OrderWithoutProductName> orderWithoutProductNameCollection =
+                _mongoDatabase.GetCollection<OrderWithoutProductName>("Orders");
+
+            var a = await orderWithoutProductNameCollection.Find(_ => true).ToListAsync();
+
+            OrderPerson orderPerson = await orderWithoutProductNameCollection.Aggregate()
+                .Match(o => o.Id == order.Id)
+                .Lookup("Persons", "personId", "_id", "person")
+                .Unwind<OrderPerson>("person")
+                .FirstOrDefaultAsync();
+
+            Assert.Equal(person.Name, orderPerson.Person.Name);
+
+            var orderPerson2 = await orderWithoutProductNameCollection.Aggregate()
+                .Match(o => o.Id == order.Id)
+                .Lookup<OrderWithoutProductName, Person, OrderPersons>(_personsCollection, o => o.PersonId, p => p.Id, op => op.Person)
+                .Unwind<OrderPersons, OrderPersonWithoutProductName>(op => op.Person)
+                .FirstOrDefaultAsync();
+
+            Assert.Equal(person.Name, orderPerson2.Person.Name);
+        }
     }
 }

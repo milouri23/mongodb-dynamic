@@ -3,7 +3,8 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace DynamicMongoTests.Entities
 {
-    public class Order
+    [BsonIgnoreExtraElements]
+    public class OrderWithoutProductName
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
@@ -12,7 +13,7 @@ namespace DynamicMongoTests.Entities
         [BsonRepresentation(BsonType.ObjectId)]
         public string PersonId { get; set; }
 
-        public string ProductName { get; set; }
+        //public string ProductName { get; set; }
         public int Quantity { get; set; }
 
         public decimal UnitValue { get; set; }
