@@ -1,4 +1,5 @@
-﻿using DynamicMongoTests.Enums;
+﻿using DynamicMongoTests.Entities;
+using DynamicMongoTests.Enums;
 using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
@@ -57,5 +58,27 @@ public static class DocumentDataRepository
                             new ("dollars", 420.69M)
                         }))
                 })
+        };
+
+    internal static List<Order> GetAllOrders() =>
+        new List<Order>
+        {
+        };
+
+    internal static List<Person> GetAllPersons() =>
+        new List<Person>
+        {
+            new()
+            {
+                Name = "John Doe",
+                Age = 42,
+                Addresses = new[]{ "704 Rainbow Trl - Brandon, Florida(FL), 33510" }
+            },
+            new()
+            {
+                Name = "Jan Jensen",
+                Age = 21,
+                Addresses = new[]{ "12 Pearl St - Sanford, Maine(ME), 04073" }
+            },
         };
 }
