@@ -30,6 +30,9 @@ namespace DynamicMongoTests
             List<Person> persons = DocumentDataRepository.GetAllPersons();
 
             _personsCollection.InsertMany(persons);
+
+            Order order = new() { PersonId = persons[0].Id, ProductName = "Product X", Quantity = 3, UnitValue = 30.99M };
+            _ordersCollection.InsertOne(order);
         }
 
         public void Dispose()
@@ -80,15 +83,13 @@ namespace DynamicMongoTests
             Assert.NotNull(order2.Id);
 
             List<Order> orders = await _ordersCollection.Find(_ => true).ToListAsync();
-            Assert.Equal(2, orders.Count);
+            Assert.Equal(3, orders.Count);
         }
 
         [Fact]
-        public async Task ShouldJoinOrderWithPerson()
+        public async Task ShouldCreateOrderWithPersonId()
         {
             Person person = await _personsCollection.Find(_ => true).FirstOrDefaultAsync();
-
-            await InsertOrder(person);
 
             Order order = await _ordersCollection.Find(_ => true).SingleOrDefaultAsync();
 
@@ -100,8 +101,6 @@ namespace DynamicMongoTests
         {
             Person person = await _personsCollection.Find(_ => true).FirstOrDefaultAsync();
 
-            await InsertOrder(person);
-
             List<BsonDocument> docs = await _ordersCollection.Aggregate().Lookup("Persons", "personId", "_id", "asPersons").As<BsonDocument>().ToListAsync();
             List<OrderPersons> ordersPersons = await _ordersCollection.Aggregate().Lookup("Persons", "personId", "_id", "person").As<OrderPersons>().ToListAsync();
 
@@ -112,17 +111,8 @@ namespace DynamicMongoTests
         [Fact]
         public async Task ShouldMakeLookupAsBsonDocumentAndOrderPerson()
         {
-            Person person = await _personsCollection.Find(_ => true).FirstOrDefaultAsync();
-
-            Order order = new()
-            {
-                PersonId = person.Id,
-                ProductName = "Product X",
-                Quantity = 3,
-                UnitValue = 30.99M
-            };
-
-            await InsertOrder(order);
+            Order order = await _ordersCollection.Find(_ => true).SingleOrDefaultAsync();
+            Person person = await _personsCollection.Find(p => p.Id == order.PersonId).SingleOrDefaultAsync();
 
             OrderPerson orderPerson = await _ordersCollection.Aggregate()
                 .Match(o => o.Id == order.Id)
@@ -151,17 +141,8 @@ namespace DynamicMongoTests
         [Fact]
         public async Task ShouldMakeLookupWithOrderWithoutProductName()
         {
-            Person person = await _personsCollection.Find(_ => true).FirstOrDefaultAsync();
-
-            Order order = new()
-            {
-                PersonId = person.Id,
-                ProductName = "Product X",
-                Quantity = 3,
-                UnitValue = 30.99M
-            };
-
-            await InsertOrder(order);
+            Order order = await _ordersCollection.Find(_ => true).SingleOrDefaultAsync();
+            Person person = await _personsCollection.Find(p => p.Id == order.PersonId).SingleOrDefaultAsync();
 
             IMongoCollection<OrderWithoutProductName> orderWithoutProductNameCollection =
                 _mongoDatabase.GetCollection<OrderWithoutProductName>("Orders");
