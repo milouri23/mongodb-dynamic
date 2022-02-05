@@ -1,4 +1,5 @@
-﻿using DynamicMongoTests.Entities;
+﻿using DynamicMongoTests.Constants;
+using DynamicMongoTests.Entities;
 using DynamicMongoTests.Repositories;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Conventions;
@@ -18,10 +19,9 @@ namespace DynamicMongoTests
 
         public JoinCollectionsTest()
         {
-            IMongoClient mongoClient = new MongoClient(
-                "mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false");
+            IMongoClient mongoClient = new MongoClient(TestConstant.MongoUri);
 
-            _mongoDatabase = mongoClient.GetDatabase("DynamicReadWriteDB");
+            _mongoDatabase = mongoClient.GetDatabase(TestConstant.MongoCollection);
 
             ConventionRegistry.Register("camelCase", new ConventionPack { new CamelCaseElementNameConvention() }, t => true);
             _ordersCollection = _mongoDatabase.GetCollection<Order>("Orders");
@@ -103,7 +103,7 @@ namespace DynamicMongoTests
             await InsertOrder(person);
 
             List<BsonDocument> docs = await _ordersCollection.Aggregate().Lookup("Persons", "personId", "_id", "asPersons").As<BsonDocument>().ToListAsync();
-            List<OrderPersons> ordersPersons = await _ordersCollection.Aggregate().Lookup("Persons", "personId", "_id", "persons").As<OrderPersons>().ToListAsync();
+            List<OrderPersons> ordersPersons = await _ordersCollection.Aggregate().Lookup("Persons", "personId", "_id", "person").As<OrderPersons>().ToListAsync();
 
             Assert.Equal(person.Id, docs[0].GetElement(1).Value.ToString());
             Assert.Equal(person.Name, ordersPersons[0].Person[0].Name);

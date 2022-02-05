@@ -1,3 +1,4 @@
+using DynamicMongoTests.Constants;
 using DynamicMongoTests.Repositories;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -17,10 +18,9 @@ public class DynamicReadingTest : IDisposable
 
     public DynamicReadingTest()
     {
-        IMongoClient mongoClient = new MongoClient(
-            "mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false");
+        IMongoClient mongoClient = new MongoClient(TestConstant.MongoUri);
 
-        _mongoDatabase = mongoClient.GetDatabase("DynamicReadWriteDB");
+        _mongoDatabase = mongoClient.GetDatabase(TestConstant.MongoCollection);
 
         _mongoCollection = _mongoDatabase.GetCollection<BsonDocument>("NonUniformDocuments");
 
