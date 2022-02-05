@@ -6,6 +6,7 @@ using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -128,15 +129,28 @@ namespace DynamicMongoTests
                 .Unwind<OrderPersons, OrderPerson>(op => op.Person)
                 .FirstOrDefaultAsync();
 
-            /* Next code doesn't work, needs a refinement */
-            //var orderPerson2 = await _ordersCollection.Aggregate()
-            //    .Match(o => o.Id == order.Id)
-            //    .Lookup<Order, Person, BsonDocument>(_personsCollection, o => o.PersonId, p => p.Id, _ => "person")
-            //    .Unwind<OrderPerson>("person")
-            //    .FirstOrDefaultAsync();
+            string joinField = FormatJoinField(nameof(OrderPerson.Person));
+
+            var orderPerson3 = await _ordersCollection.Aggregate()
+                .Match(o => o.Id == order.Id)
+                .Lookup<Order, Person, BsonDocument>(
+                    _personsCollection,
+                    o => o.PersonId,
+                    p => p.Id,
+                    x => x[joinField])
+                //x => x["person"])
+                //.Unwind<OrderPerson>("person")
+                .Unwind<OrderPerson>(joinField)
+                .FirstOrDefaultAsync();
 
             Assert.Equal(person.Name, orderPerson2.Person.Name);
+            Assert.Equal(person.Name, orderPerson3.Person.Name);
         }
+
+        private string FormatJoinField(string fieldName) =>
+            char.IsLower(fieldName[0])
+                ? fieldName
+                : string.Concat(char.ToLower(fieldName[0]), fieldName[1..]);
 
         [Fact]
         public async Task ShouldMakeLookupWithOrderWithoutProductName()

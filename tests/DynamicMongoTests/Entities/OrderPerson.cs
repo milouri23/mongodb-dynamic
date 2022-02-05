@@ -1,6 +1,5 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using System.Collections.Generic;
 
 namespace DynamicMongoTests.Entities;
 
@@ -16,5 +15,6 @@ public class OrderPerson
     public string ProductName { get; set; }
     public int Quantity { get; set; }
     public decimal UnitValue { get; set; }
+
     public Person Person { get; set; }
 }
