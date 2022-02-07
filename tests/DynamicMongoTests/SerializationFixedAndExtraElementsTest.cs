@@ -28,7 +28,7 @@ public class SerializationFixedAndExtraElementsTest : IDisposable
     {
         IMongoClient mongoClient = new MongoClient(TestConstant.MongoUri);
 
-        _mongoDatabase = mongoClient.GetDatabase(TestConstant.MongoCollection);
+        _mongoDatabase = mongoClient.GetDatabase(TestConstant.MongoDatabase);
 
         _mongoCollection = _mongoDatabase.GetCollection<BsonDocument>("ClientsInfo");
 
@@ -107,17 +107,25 @@ public class ClientInfo
 
     [BsonExtraElements]
     public IDictionary<string, object> AdditionalInfo { get; set; }
+
+    // A Bson Document could be used instead
+    //[BsonExtraElements]
+    //public BsonDocument AdditionalInfo { get; set; }
 }
 
 [BsonIgnoreExtraElements] // I do not want to map the _id field
 public class ClientInfoBetter
 {
-    [JsonConverter(typeof(StringEnumConverter))]    // JSON.NET
+    //[JsonConverter(typeof(StringEnumConverter))]    // JSON.NET
     [BsonRepresentation(BsonType.String)]           // Mongo
     public ClientType ClientType { get; set; }
 
     public int TotalPurchases { get; set; }
 
     //[BsonExtraElements()]
+    // A dinamic dictionary that has 'additionalInfo' name in database
     public IDictionary<string, object> AdditionalInfo { get; set; }
+
+    // Could be used a Bson document that has 'additionalInfo' name in database
+    //public BsonDocument AdditionalInfo { get; set; }
 }

@@ -22,7 +22,7 @@ namespace DynamicMongoTests
         {
             IMongoClient mongoClient = new MongoClient(TestConstant.MongoUri);
 
-            _mongoDatabase = mongoClient.GetDatabase(TestConstant.MongoCollection);
+            _mongoDatabase = mongoClient.GetDatabase(TestConstant.MongoDatabase);
 
             ConventionRegistry.Register("camelCase", new ConventionPack { new CamelCaseElementNameConvention() }, t => true);
             _ordersCollection = _mongoDatabase.GetCollection<Order>("Orders");
@@ -42,14 +42,14 @@ namespace DynamicMongoTests
             _mongoDatabase.DropCollection("Persons");
         }
 
-        private async Task InsertOrder(Person person) =>
-            await _ordersCollection.InsertOneAsync(new Order()
-            {
-                PersonId = person.Id,
-                ProductName = "Product X",
-                Quantity = 3,
-                UnitValue = 30.99M
-            });
+        //private async Task InsertOrder(Person person) =>
+        //    await _ordersCollection.InsertOneAsync(new Order()
+        //    {
+        //        PersonId = person.Id,
+        //        ProductName = "Product X",
+        //        Quantity = 3,
+        //        UnitValue = 30.99M
+        //    });
 
         private async Task InsertOrder(Order order) =>
             await _ordersCollection.InsertOneAsync(order);

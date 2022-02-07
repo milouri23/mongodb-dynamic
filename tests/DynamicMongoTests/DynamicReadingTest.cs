@@ -20,7 +20,7 @@ public class DynamicReadingTest : IDisposable
     {
         IMongoClient mongoClient = new MongoClient(TestConstant.MongoUri);
 
-        _mongoDatabase = mongoClient.GetDatabase(TestConstant.MongoCollection);
+        _mongoDatabase = mongoClient.GetDatabase(TestConstant.MongoDatabase);
 
         _mongoCollection = _mongoDatabase.GetCollection<BsonDocument>("NonUniformDocuments");
 
