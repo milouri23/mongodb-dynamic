@@ -29,7 +29,22 @@ public class DynamicReadingTest : IDisposable
     }
 
     public void Dispose() =>
-        _mongoDatabase.DropCollection("NonUniformDocuments");
+        _mongoDatabase.DropCollection("NonUniformDocumentsa");
+
+    [Fact]
+    public async Task ShouldWriteAllDocuments()
+    {
+        Dictionary<string, object> dic = new() {
+            {"a", 1 },
+            {"b", "4" },
+            {"c", true }
+        };
+
+        //dic.ToBsonDocument();
+
+        await _mongoCollection.InsertManyAsync(new List<BsonDocument>() { dic.ToBsonDocument() });
+        Assert.Equal(dic["a"], 1);
+    }
 
     [Fact]
     public async Task ShouldGetAllDocuments()
